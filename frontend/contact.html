@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="聯絡我：留言給我，有任何問題或合作邀請歡迎聯絡">
+  <title>聯絡我 | 我的履歷</title>
+
+  <!-- Tailwind CSS v4（CDN） -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.3"></script>
+
+  <!-- 主題色與共用元件樣式（與 frontend.md 第 2 節一致，所有頁面需相同） -->
+  <style type="text/tailwindcss">
+    @theme {
+      --color-espresso: #1a110d;
+      --color-roast: #2a1c17;
+      --color-roast-light: #3a2820;
+      --color-rose-smoke: #c48b9f;
+      --color-champagne: #d8b98e;
+      --color-ash-rose: #b9a3a6;
+      --color-powder-white: #f8eeea;
+      --color-mist-rose: #c9b5b3;
+    }
+
+    @layer components {
+      /* 彩繪玻璃卡片：半透明疊層 + 模糊 + 煙燻粉描邊 */
+      .glass-card {
+        @apply rounded-2xl border border-rose-smoke/30 bg-linear-to-br from-rose-smoke/15 to-powder-white/5 shadow-xl shadow-black/30 backdrop-blur-xl;
+      }
+      /* 主要按鈕：煙燻粉底 + 深棕字 */
+      .btn-primary {
+        @apply rounded-lg bg-rose-smoke px-5 py-2 font-medium text-espresso transition-colors duration-200 hover:bg-rose-smoke/85 disabled:cursor-not-allowed disabled:opacity-50;
+      }
+      /* 次要按鈕：透明底 + 煙燻粉描邊 */
+      .btn-secondary {
+        @apply rounded-lg border border-rose-smoke/50 px-5 py-2 font-medium text-rose-smoke transition-colors duration-200 hover:bg-rose-smoke/10 disabled:cursor-not-allowed disabled:opacity-50;
+      }
+      /* 導覽連結：目前頁面（aria-current="page"）高亮 */
+      .nav-link {
+        @apply text-sm font-medium text-mist-rose transition-colors duration-200 hover:text-rose-smoke aria-[current=page]:text-rose-smoke;
+      }
+
+      /* ===== 頁面專用元件 ===== */
+      /* 表單欄位（與後台的樣式一致） */
+      .form-label {
+        @apply mb-1 block text-sm font-medium text-mist-rose;
+      }
+      .form-input {
+        @apply w-full rounded-lg border border-rose-smoke/30 bg-espresso/60 px-3 py-2 text-powder-white placeholder:text-mist-rose/50 focus:border-rose-smoke focus:outline-none focus:ring-1 focus:ring-rose-smoke aria-[invalid=true]:border-red-300;
+      }
+      .field-error {
+        @apply mt-1 text-sm text-red-300;
+      }
+    }
+  </style>
+</head>
+<body class="flex min-h-screen flex-col bg-espresso text-powder-white antialiased">
+
+  <!-- 頁首：固定於頂部的主導覽列（h-16 = 4rem，內容區要留出空間） -->
+  <header class="site-header fixed inset-x-0 top-0 z-50 border-b border-rose-smoke/20 bg-espresso/70 backdrop-blur-xl">
+    <nav class="main-nav mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6 lg:px-8" aria-label="主導覽">
+      <a href="./index.html" class="brand-logo text-lg font-semibold text-rose-smoke">我的履歷</a>
+
+      <!-- 桌面與平板選單：md 以上顯示 -->
+      <ul class="nav-link-list hidden items-center gap-8 md:flex">
+        <li><a href="./index.html" class="nav-link">首頁</a></li>
+        <li><a href="./portfolio.html" class="nav-link">作品集</a></li>
+        <li><a href="./contact.html" class="nav-link">聯絡我</a></li>
+        <li><a href="./admin/login.html" class="auth-link btn-primary">登入</a></li>
+      </ul>
+
+      <!-- 漢堡按鈕：md 以下顯示 -->
+      <button id="menu-toggle" type="button" class="menu-toggle rounded-lg p-2 text-powder-white transition-colors duration-200 hover:bg-roast-light md:hidden" aria-label="開啟選單" aria-expanded="false" aria-controls="mobile-menu">
+        <svg id="menu-icon-open" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        <svg id="menu-icon-close" class="hidden h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>
+        </svg>
+      </button>
+    </nav>
+
+    <!-- 手機版展開選單：預設隱藏 -->
+    <div id="mobile-menu" class="mobile-menu hidden border-t border-rose-smoke/20 bg-espresso/95 md:hidden">
+      <ul class="flex flex-col gap-1 px-4 py-4">
+        <li><a href="./index.html" class="nav-link block rounded-lg px-3 py-3 text-base">首頁</a></li>
+        <li><a href="./portfolio.html" class="nav-link block rounded-lg px-3 py-3 text-base">作品集</a></li>
+        <li><a href="./contact.html" class="nav-link block rounded-lg px-3 py-3 text-base">聯絡我</a></li>
+        <li><a href="./admin/login.html" class="auth-link btn-primary mt-2 block text-center">登入</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main id="main-content" class="page-content flex-1">
+
+    <!-- 聯絡我：留言表單，送出後會出現在後台的「留言管理」 -->
+    <section class="content-section min-h-screen px-4 pb-16 pt-24 md:px-6 lg:px-8 lg:pb-24" aria-labelledby="contact-title">
+      <div class="mx-auto max-w-2xl">
+        <header class="section-heading mb-8 md:mb-10">
+          <h1 id="contact-title" class="section-title text-3xl font-bold md:text-4xl">聯絡我</h1>
+          <p class="section-description mt-3 text-mist-rose">有任何問題或合作邀請，歡迎留言，我會盡快回覆。</p>
+        </header>
+
+        <article class="info-card glass-card p-6 md:p-8">
+          <form id="contact-form" novalidate>
+            <div class="mb-5">
+              <label for="contact-name" class="form-label">姓名 <span class="text-rose-smoke">*</span></label>
+              <input id="contact-name" name="name" type="text" maxlength="50" autocomplete="name" class="form-input">
+              <p class="field-error hidden" data-error-for="name"></p>
+            </div>
+
+            <div class="mb-5">
+              <label for="contact-email" class="form-label">Email <span class="text-rose-smoke">*</span></label>
+              <input id="contact-email" name="email" type="email" maxlength="100" autocomplete="email" class="form-input" placeholder="you@example.com">
+              <p class="field-error hidden" data-error-for="email"></p>
+            </div>
+
+            <div class="mb-5">
+              <label for="contact-content" class="form-label">留言內容 <span class="text-rose-smoke">*</span></label>
+              <textarea id="contact-content" name="content" rows="6" maxlength="2000" class="form-input"></textarea>
+              <p class="mt-1 text-right text-xs text-mist-rose"><span id="content-count">0</span> / 2000</p>
+              <p class="field-error hidden" data-error-for="content"></p>
+            </div>
+
+            <!-- 送出結果：成功或失敗的訊息 -->
+            <p id="form-message" class="mb-5 hidden text-sm" role="status"></p>
+
+            <button id="contact-submit" type="submit" class="btn-primary w-full md:w-auto">送出留言</button>
+          </form>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 頁尾：版權與社群連結 -->
+  <footer class="site-footer border-t border-rose-smoke/20 bg-roast/60">
+    <div class="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-8 md:flex-row md:justify-between md:px-6 lg:px-8">
+      <p class="copyright-text text-sm text-mist-rose">© <span class="current-year">2026</span> 你的名字. All rights reserved.</p>
+      <ul class="social-link-list flex items-center gap-5">
+        <li>
+          <a href="https://github.com/" target="_blank" rel="noopener noreferrer" class="social-link text-mist-rose transition-colors duration-200 hover:text-rose-smoke" aria-label="GitHub">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          </a>
+        </li>
+        <li>
+          <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" class="social-link text-mist-rose transition-colors duration-200 hover:text-rose-smoke" aria-label="LinkedIn">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          </a>
+        </li>
+        <li>
+          <a href="mailto:you@example.com" class="social-link text-mist-rose transition-colors duration-200 hover:text-rose-smoke" aria-label="Email">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- GSAP + ScrollTrigger（CDN，僅前台頁面） -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+  <script type="module" src="./js/contact.js"></script>
+</body>
+</html>
