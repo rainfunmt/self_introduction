@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登入 | 管理後台</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.3"></script>
+  <!-- 主題色與元件樣式：共用區塊（同 frontend.md 第 2 節）+ 後台專用元件，需放在同一個 style 內 -->
+  <style type="text/tailwindcss">
+    @theme {
+      --color-espresso: #1a110d;
+      --color-roast: #2a1c17;
+      --color-roast-light: #3a2820;
+      --color-rose-smoke: #c48b9f;
+      --color-champagne: #d8b98e;
+      --color-ash-rose: #b9a3a6;
+      --color-powder-white: #f8eeea;
+      --color-mist-rose: #c9b5b3;
+    }
+
+    @layer components {
+      /* ===== 共用區塊（與 frontend.md 第 2 節一致） ===== */
+      .glass-card {
+        @apply rounded-2xl border border-rose-smoke/30 bg-linear-to-br from-rose-smoke/15 to-powder-white/5 shadow-xl shadow-black/30 backdrop-blur-xl;
+      }
+      .btn-primary {
+        @apply rounded-lg bg-rose-smoke px-5 py-2 font-medium text-espresso transition-colors duration-200 hover:bg-rose-smoke/85 disabled:cursor-not-allowed disabled:opacity-50;
+      }
+      .btn-secondary {
+        @apply rounded-lg border border-rose-smoke/50 px-5 py-2 font-medium text-rose-smoke transition-colors duration-200 hover:bg-rose-smoke/10 disabled:cursor-not-allowed disabled:opacity-50;
+      }
+      .nav-link {
+        @apply text-sm font-medium text-mist-rose transition-colors duration-200 hover:text-rose-smoke aria-[current=page]:text-rose-smoke;
+      }
+
+      /* ===== 後台專用元件 ===== */
+      /* 側邊欄連結：hover 變亮；目前頁面（aria-current="page"）左側粉色細條 + 粉色淡底 + 粉色文字 */
+      .sidebar-link {
+        @apply flex w-full items-center rounded-lg border-l-2 border-transparent px-3 py-2 text-left text-sm text-mist-rose transition-colors duration-150 hover:bg-roast-light hover:text-powder-white aria-[current=page]:border-rose-smoke aria-[current=page]:bg-rose-smoke/15 aria-[current=page]:font-medium aria-[current=page]:text-rose-smoke;
+      }
+      /* 表單欄位 */
+      .form-label {
+        @apply mb-1 block text-sm font-medium text-mist-rose;
+      }
+      .form-input {
+        @apply w-full rounded-lg border border-rose-smoke/30 bg-espresso/60 px-3 py-2 text-powder-white placeholder:text-mist-rose/50 focus:border-rose-smoke focus:outline-none focus:ring-1 focus:ring-rose-smoke aria-[invalid=true]:border-red-300;
+      }
+      .field-error {
+        @apply mt-1 text-sm text-red-300;
+      }
+      /* 表格列操作按鈕 */
+      .btn-small {
+        @apply rounded-lg border border-rose-smoke/40 px-3 py-1.5 text-sm text-rose-smoke transition-colors duration-150 hover:bg-rose-smoke/10;
+      }
+      .btn-danger {
+        @apply rounded-lg border border-red-300/40 px-3 py-1.5 text-sm text-red-300 transition-colors duration-150 hover:bg-red-300/10;
+      }
+    }
+  </style>
+</head>
+<body class="flex min-h-screen items-center justify-center bg-linear-to-b from-roast to-espresso px-4 text-powder-white antialiased">
+
+  <!-- 登入卡片 -->
+  <main class="login-card glass-card w-full max-w-sm p-8">
+    <h1 class="mb-1 text-2xl font-semibold text-rose-smoke">管理後台</h1>
+    <p class="mb-6 text-sm text-mist-rose">請登入以繼續</p>
+
+    <!-- method="post"：萬一頁面程式沒載入，帳號密碼也不會被放進網址列 -->
+    <form id="login-form" method="post" novalidate>
+      <div class="mb-4">
+        <label for="login-username" class="form-label">帳號</label>
+        <input id="login-username" name="username" type="text" maxlength="50" autocomplete="username" class="form-input">
+      </div>
+      <div class="mb-4">
+        <label for="login-password" class="form-label">密碼</label>
+        <input id="login-password" name="password" type="password" maxlength="72" autocomplete="current-password" class="form-input">
+      </div>
+
+      <!-- 登入失敗訊息 -->
+      <p id="login-error" class="field-error mb-4 hidden" role="alert"></p>
+
+      <!-- 頁面程式（login.js）沒載入成功時才會顯示的提示 -->
+      <p id="load-warning" class="field-error mb-4 hidden" role="alert">頁面程式沒有載入，所以無法登入。請確認：(1) 網址是 http://localhost:5500/admin/login.html；(2) 前端伺服器是在 frontend 資料夾內執行；(3) 不是直接雙擊 html 檔開啟。</p>
+
+      <button id="login-submit" type="submit" class="btn-primary w-full">登入</button>
+    </form>
+  </main>
+
+  <script>
+    // 保護機制（一般 script，不依賴 login.js 是否載入成功）：
+    // login.js 載入成功後會設定 window.loginPageReady = true。
+    // 沒設定就代表頁面程式壞了，此時不讓瀏覽器做原生表單送出，改為顯示提示。
+    const loginForm = document.getElementById('login-form');
+    const loadWarning = document.getElementById('load-warning');
+    loginForm.addEventListener('submit', (event) => {
+      if (window.loginPageReady) return;
+      event.preventDefault();
+      loadWarning.classList.remove('hidden');
+    });
+    // 頁面載入完成（含 module script 執行完）後檢查一次，程式沒載入就直接提示
+    window.addEventListener('load', () => {
+      if (!window.loginPageReady) loadWarning.classList.remove('hidden');
+    });
+  </script>
+  <script type="module" src="./js/login.js"></script>
+</body>
+</html>

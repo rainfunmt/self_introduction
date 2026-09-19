@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>個人資料 | 管理後台</title>
+
+  <!-- Tailwind CSS v4（CDN）；後台不引入動畫套件 -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.3"></script>
+
+  <!-- 主題色與元件樣式：共用區塊（同 frontend.md 第 2 節）+ 後台專用元件，需放在同一個 style 內 -->
+  <style type="text/tailwindcss">
+    @theme {
+      --color-espresso: #1a110d;
+      --color-roast: #2a1c17;
+      --color-roast-light: #3a2820;
+      --color-rose-smoke: #c48b9f;
+      --color-champagne: #d8b98e;
+      --color-ash-rose: #b9a3a6;
+      --color-powder-white: #f8eeea;
+      --color-mist-rose: #c9b5b3;
+    }
+
+    @layer components {
+      /* ===== 共用區塊（與 frontend.md 第 2 節一致） ===== */
+      .glass-card {
+        @apply rounded-2xl border border-rose-smoke/30 bg-linear-to-br from-rose-smoke/15 to-powder-white/5 shadow-xl shadow-black/30 backdrop-blur-xl;
+      }
+      .btn-primary {
+        @apply rounded-lg bg-rose-smoke px-5 py-2 font-medium text-espresso transition-colors duration-200 hover:bg-rose-smoke/85 disabled:cursor-not-allowed disabled:opacity-50;
+      }
+      .btn-secondary {
+        @apply rounded-lg border border-rose-smoke/50 px-5 py-2 font-medium text-rose-smoke transition-colors duration-200 hover:bg-rose-smoke/10 disabled:cursor-not-allowed disabled:opacity-50;
+      }
+      .nav-link {
+        @apply text-sm font-medium text-mist-rose transition-colors duration-200 hover:text-rose-smoke aria-[current=page]:text-rose-smoke;
+      }
+
+      /* ===== 後台專用元件 ===== */
+      /* 側邊欄連結：hover 變亮；目前頁面（aria-current="page"）左側粉色細條 + 粉色淡底 + 粉色文字 */
+      .sidebar-link {
+        @apply flex w-full items-center rounded-lg border-l-2 border-transparent px-3 py-2 text-left text-sm text-mist-rose transition-colors duration-150 hover:bg-roast-light hover:text-powder-white aria-[current=page]:border-rose-smoke aria-[current=page]:bg-rose-smoke/15 aria-[current=page]:font-medium aria-[current=page]:text-rose-smoke;
+      }
+      /* 表單欄位 */
+      .form-label {
+        @apply mb-1 block text-sm font-medium text-mist-rose;
+      }
+      .form-input {
+        @apply w-full rounded-lg border border-rose-smoke/30 bg-espresso/60 px-3 py-2 text-powder-white placeholder:text-mist-rose/50 focus:border-rose-smoke focus:outline-none focus:ring-1 focus:ring-rose-smoke aria-[invalid=true]:border-red-300;
+      }
+      .field-error {
+        @apply mt-1 text-sm text-red-300;
+      }
+      /* 表格列操作按鈕 */
+      .btn-small {
+        @apply rounded-lg border border-rose-smoke/40 px-3 py-1.5 text-sm text-rose-smoke transition-colors duration-150 hover:bg-rose-smoke/10;
+      }
+      .btn-danger {
+        @apply rounded-lg border border-red-300/40 px-3 py-1.5 text-sm text-red-300 transition-colors duration-150 hover:bg-red-300/10;
+      }
+    }
+  </style>
+</head>
+<body class="invisible bg-espresso text-powder-white antialiased">
+
+  <!-- 手機版頂部列：只在手機顯示，含開啟側邊欄的漢堡按鈕 -->
+  <div class="mobile-topbar sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-rose-smoke/20 bg-roast px-4 md:hidden">
+    <button id="sidebar-toggle" type="button" class="rounded-lg p-2 transition-colors duration-150 hover:bg-roast-light" aria-label="開啟選單" aria-expanded="false" aria-controls="sidebar">
+      <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <span class="font-semibold text-rose-smoke">管理後台</span>
+  </div>
+
+  <!-- 左側固定邊欄：寬 w-64；手機預設隱藏，點漢堡按鈕以覆蓋方式顯示 -->
+  <aside id="sidebar" class="admin-sidebar fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-rose-smoke/20 bg-roast md:flex" aria-label="後台側邊欄">
+    <!-- 邊欄標題 -->
+    <div class="sidebar-brand flex h-16 shrink-0 items-center border-b border-rose-smoke/20 px-6">
+      <span class="text-lg font-semibold text-rose-smoke">管理後台</span>
+    </div>
+
+    <!-- 導覽項目：目前頁面由 JS 標記 aria-current="page" -->
+    <nav class="sidebar-nav flex-1 space-y-1 overflow-y-auto p-4" aria-label="後台導覽">
+      <a href="/admin/dashboard.html" class="sidebar-link">儀表板</a>
+      <a href="/admin/projects.html" class="sidebar-link">作品管理</a>
+      <a href="/admin/messages.html" class="sidebar-link">留言管理</a>
+      <a href="/admin/profile.html" class="sidebar-link">個人資料</a>
+    </nav>
+
+    <!-- 邊欄底部：登出 -->
+    <div class="sidebar-footer shrink-0 border-t border-rose-smoke/20 p-4">
+      <button id="logout-button" type="button" class="sidebar-link">登出</button>
+    </div>
+  </aside>
+
+  <!-- 右側主內容區：桌面版留出邊欄寬度 -->
+  <main id="admin-main" class="admin-main min-h-screen md:ml-64">
+    <div class="mx-auto max-w-6xl p-4 md:p-8">
+
+      <!-- 頁面標題列：標題與前往前台的連結 -->
+      <header class="page-header mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-semibold">個人資料</h1>
+          <p class="mt-1 text-sm text-mist-rose">這裡的內容會顯示在前台的個人名片頁。</p>
+        </div>
+        <a href="/profile-card.html" target="_blank" rel="noopener noreferrer" class="btn-secondary">查看前台名片</a>
+      </header>
+
+      <!-- 大頭貼：選好圖片就直接上傳，前台名片頁會顯示這張圖 -->
+      <section class="avatar-panel glass-card mb-6 max-w-2xl p-6 md:p-8" aria-labelledby="avatar-title">
+        <h2 id="avatar-title" class="mb-4 text-lg font-semibold">大頭貼</h2>
+        <div class="flex flex-col items-center gap-6 sm:flex-row">
+          <!-- 預覽：沒有大頭貼時顯示姓名首字，有就換成圖片 -->
+          <div id="avatar-preview" class="avatar-preview flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-rose-smoke to-champagne text-4xl font-bold text-espresso ring-4 ring-rose-smoke/30"></div>
+
+          <div class="w-full flex-1 text-center sm:text-left">
+            <p class="text-sm text-mist-rose">支援 PNG、JPG、WebP、GIF，大小上限 2 MB，建議使用正方形圖片。</p>
+
+            <!-- 檔案輸入用 sr-only 隱藏（仍可用鍵盤操作），由旁邊的 label 當成按鈕 -->
+            <div class="mt-4 flex flex-wrap justify-center gap-3 sm:justify-start">
+              <input id="avatar-input" type="file" accept=".png,.jpg,.jpeg,.gif,.webp,image/png,image/jpeg,image/gif,image/webp" class="peer sr-only">
+              <label for="avatar-input" class="btn-primary cursor-pointer peer-focus-visible:ring-2 peer-focus-visible:ring-powder-white">選擇圖片並上傳</label>
+              <button id="avatar-remove-button" type="button" class="btn-secondary">移除大頭貼</button>
+            </div>
+            <p id="avatar-error" class="field-error hidden" role="alert"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 編輯表單 -->
+      <section class="profile-panel glass-card max-w-2xl p-6 md:p-8" aria-labelledby="form-title">
+        <h2 id="form-title" class="sr-only">編輯個人資料</h2>
+        <form id="profile-form" novalidate>
+          <div class="mb-4">
+            <label for="profile-display-name" class="form-label">姓名 <span class="text-rose-smoke">*</span></label>
+            <input id="profile-display-name" name="display_name" type="text" maxlength="50" class="form-input" autocomplete="off">
+            <p class="field-error hidden" data-error-for="display_name"></p>
+          </div>
+
+          <div class="mb-4">
+            <label for="profile-job-title" class="form-label">職稱 <span class="text-rose-smoke">*</span></label>
+            <input id="profile-job-title" name="job_title" type="text" maxlength="50" class="form-input" autocomplete="off">
+            <p class="field-error hidden" data-error-for="job_title"></p>
+          </div>
+
+          <div class="mb-4">
+            <label for="profile-location" class="form-label">所在地</label>
+            <input id="profile-location" name="location" type="text" maxlength="50" class="form-input" autocomplete="off">
+            <p class="field-error hidden" data-error-for="location"></p>
+          </div>
+
+          <div class="mb-4">
+            <label for="profile-bio" class="form-label">自我介紹</label>
+            <textarea id="profile-bio" name="bio" rows="5" maxlength="500" class="form-input"></textarea>
+            <p class="mt-1 text-right text-xs text-mist-rose"><span id="bio-count">0</span> / 500</p>
+            <p class="field-error hidden" data-error-for="bio"></p>
+          </div>
+
+          <div class="mb-4">
+            <label for="profile-skills" class="form-label">技能標籤</label>
+            <input id="profile-skills" name="skills" type="text" class="form-input" placeholder="用逗號分隔，例如：Python, FastAPI, Tailwind CSS" autocomplete="off">
+            <p class="mt-1 text-xs text-mist-rose">最多 12 個，每個最多 20 字。</p>
+            <p class="field-error hidden" data-error-for="skills"></p>
+          </div>
+
+          <!-- 伺服器回傳的錯誤訊息 -->
+          <p id="form-error" class="field-error mb-4 hidden" role="alert"></p>
+
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <p id="updated-at" class="text-xs text-mist-rose"></p>
+            <div class="flex gap-3">
+              <button id="reset-button" type="button" class="btn-secondary">還原</button>
+              <button id="submit-button" type="submit" class="btn-primary">儲存</button>
+            </div>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <!-- 刪除確認 Modal：取代瀏覽器內建確認視窗；按鈕的 value 會成為 returnValue -->
+  <dialog id="confirm-dialog" class="modal-dialog m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-rose-smoke/30 bg-roast p-0 text-powder-white shadow-2xl backdrop:bg-black/60" aria-labelledby="confirm-title">
+    <form method="dialog" class="p-6">
+      <h2 id="confirm-title" class="mb-2 text-lg font-semibold">請確認</h2>
+      <p class="mb-6 text-sm text-mist-rose" data-confirm-message></p>
+      <div class="flex justify-end gap-3">
+        <button type="submit" value="cancel" class="btn-secondary">取消</button>
+        <button type="submit" value="confirm" class="btn-primary">確定刪除</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="./js/profile.js"></script>
+</body>
+</html>
