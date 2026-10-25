@@ -1,10 +1,12 @@
 """資料庫連線與初始化"""
 import json
+import os
 import sqlite3
 from pathlib import Path
 
-# 資料庫檔案固定放在 backend/portfolio.db
-DB_PATH = Path(__file__).resolve().parent / "portfolio.db"
+# 資料庫預設放在 backend/portfolio.db（已列入 .gitignore，不會被 commit）；
+# 可用環境變數 PORTFOLIO_DB_PATH 改放到專案資料夾以外
+DB_PATH = Path(os.getenv("PORTFOLIO_DB_PATH") or Path(__file__).resolve().parent / "portfolio.db")
 
 # 個人資料的預設內容（第一次啟動時寫入，之後在後台修改）
 DEFAULT_PROFILE = {

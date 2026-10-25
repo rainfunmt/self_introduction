@@ -1,0 +1,14 @@
+# 資料庫：含管理者密碼雜湊與訪客留言，不可上傳
+*.db
+*.sqlite
+*.sqlite3
+
+# Python 暫存檔
+__pycache__/
+*.py[cod]
+
+# 環境變數（密鑰）
+.env
+
+# 後台上傳的作品檔案（頭像 backend/uploads/avatars/ 保留在 repo 中）
+backend/uploads/project-files/
