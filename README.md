@@ -23,3 +23,17 @@
 ```
 python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
+
+## 隱私
+
+聯絡表單會收集訪客的姓名、Email 與留言，只存放在本網站的資料庫、只用於回覆留言，頁面上已附隱私權說明（`frontend/contact.html`）。正式上線時，請確認說明內容與實際的保存期間、刪除方式一致。
+
+## AI 協作說明
+
+本專案在開發過程中使用 AI 工具（Anthropic 的 Claude Code）協助：
+- `CLAUDE.md` 與 `.claude/`（rules、skills）是提供給 AI 的開發規範，保留在 repo 中，說明程式碼遵循的寫法。
+- 2026-10-25 的安全性與隱私修正由 Claude Code 協助完成，經作者審閱後才推送，包括：
+  - 移除曾被上傳的資料庫與暫存檔，並把 commit 改用 GitHub 匿名 Email。
+  - 移除寫死的 JWT 預設密鑰。
+  - 補上 `.gitignore`。
+  - 補上聯絡表單的隱私權說明。
