@@ -208,7 +208,7 @@ def init_db():
 
 - JWT 使用 **PyJWT**（`import jwt`），演算法 `HS256`，**有效期 24 小時**。
 - 密碼用 **passlib 的 bcrypt** 雜湊，資料庫只存 `password_hash`，**絕不儲存或記錄明碼**。
-- 密鑰從環境變數 `JWT_SECRET_KEY` 讀取；開發用預設值也要 **≥ 32 bytes**（否則 PyJWT 會發出 `InsecureKeyLengthWarning`）。正式環境必須換掉。
+- 密鑰從環境變數 `JWT_SECRET_KEY` 讀取，長度要 **≥ 32 bytes**（否則 PyJWT 會發出 `InsecureKeyLengthWarning`）。**絕不在程式碼裡寫死預設密鑰**（原始碼公開後任何人都能用它偽造登入憑證）；沒設定時用 `secrets.token_urlsafe()` 每次啟動隨機產生，只供本機開發。正式環境必須設定。
 - JWT 的 `sub` 必須是**字串**（`str(user_id)`），傳整數會在解碼時拋 `InvalidSubjectError`。
 - `jwt.decode()` 一定要明確傳 `algorithms=[...]`。
 - 受保護的路由用 `Depends(get_current_user)`；不需要使用者物件時，寫在裝飾器的 `dependencies=[...]`。
@@ -220,7 +220,9 @@ def init_db():
 ```python
 """認證工具：密碼雜湊、JWT 簽發與驗證"""
 import os
+import secrets
 import sqlite3
+import warnings
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -230,8 +232,15 @@ from passlib.context import CryptContext
 
 from database import get_db
 
-# 密鑰從環境變數讀取；預設值只供開發，且需 ≥ 32 bytes
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-only-secret-key-change-in-production-0123456789")
+# 密鑰從環境變數讀取（需 ≥ 32 bytes）。
+# 沒設定時每次啟動隨機產生一組，只適合本機開發：重新啟動後要重新登入。
+# 不再使用寫死在程式碼裡的預設值，因為原始碼公開後任何人都能用它偽造登入憑證。
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    SECRET_KEY = secrets.token_urlsafe(48)
+    warnings.warn("未設定 JWT_SECRET_KEY，已改用隨機密鑰（僅限本機開發；正式上線前務必設定）")
+elif len(SECRET_KEY.encode()) < 32:
+    raise RuntimeError("JWT_SECRET_KEY 至少要 32 bytes")
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_HOURS = 24
 
