@@ -3,9 +3,11 @@
 *.sqlite
 *.sqlite3
 
-# Python 暫存檔
+# Python 暫存檔與虛擬環境
 __pycache__/
 *.py[cod]
+.venv/
+venv/
 
 # 環境變數（密鑰）
 .env
